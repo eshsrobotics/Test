@@ -1,0 +1,26 @@
+function mainloop
+{
+	local number=17
+	echo "$number"
+	read -p "What's your name? " player
+	echo "$player you are a nerd."
+	echo "lets go" 
+	#startofmainloop
+	while true
+	do
+		echo "Guess a number between one and one hundred."
+		read -p "What is your guess $player? " number
+		 if (( number < 17))
+		 then 
+			echo "Your guess was less than it nerd. Why was it $number?"
+		 elif (( number > 17))
+		 then
+			echo "Your guess was more than it nerd. Why was it $number?"
+		else 
+			echo "gg"
+			exit
+	fi	
+	
+	done
+}
+mainloop
