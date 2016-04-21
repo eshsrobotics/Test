@@ -1,0 +1,40 @@
+
+function mainloop {
+
+	local number=100	
+	
+	read -p "What's your name? " player
+	echo "I already don't like you, $player."
+	echo "Let's go."
+
+	# Start of main loop.
+	while true
+	do	
+		read -p "I'm thinking of a number between 1 and 100.  Guess it. " guess
+		
+		if (( guess < number ))
+		then
+			echo "Higher."
+		elif (( guess > number ))
+		then
+			echo "Lower."
+		else
+			echo "God dammit."
+			exit
+		fi
+	done
+}
+
+function print_progress {
+	local current_guess=$1
+	local max_guesses=$2
+	
+	local field_width=
+	
+	if (( current_guess >= max_guesses )); then
+		for i in {0..$max_guesses}; do
+		  printf 
+		done
+	fi
+}
+mainloop
