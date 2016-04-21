@@ -1,0 +1,23 @@
+function main_loop {
+
+	local number=100
+	read -p "What's your name player?" player
+	echo "$player ok lets play but first here's some bleach"
+	#start of mainloop
+	while true
+	do
+		read -p "Speak now or forever hold your peace between -1 and 100, $player: " guess
+		if (( guess > number))
+		then
+			echo "You fool it is obviously less"
+		elif (( guess < number))
+		then
+			echo "dumb ass, it's higher"
+		else
+			echo "..."
+			echo "The computer has commited"
+			exit
+			fi
+	done
+	}
+main_loop
