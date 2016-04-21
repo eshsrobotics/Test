@@ -1,0 +1,25 @@
+function main_loop
+	{
+		local number=1759
+		echo "Greetings, human."
+		read -p "What's your name?" player
+		echo "$player, what an interesting name. I like you already."
+		echo "Would you like to play a game?"
+		echo "It could be fun!"
+		echo "Let's begin."
+		#start of main_loop
+		while true
+		do
+			read -p "I have a number in mind. What do you think it is? I don't think you'll get it, but try anyway. Your guess:" guess 
+			if ((guess < number))
+			then
+				echo "How could you get that wrong? It's obviously higher. Perhaps there is a syntax error in your cortex? Downloading insults...Dumbass. Try again."
+			elif ((guess > number))
+			then
+				echo "Maybe there is something wrong with your cortex. It's lower. Downloading insults...Dumbass. Try again."
+			else
+				echo "Dammit. You win, you asshole."
+			fi
+		done
+	}
+main_loop
