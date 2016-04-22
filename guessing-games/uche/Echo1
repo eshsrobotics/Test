@@ -1,40 +1,76 @@
-
 function mainloop {
 
-	local number=100	
-	
-	read -p "What's your name? " player
-	echo "I already don't like you, $player."
-	echo "Let's go."
+        local number=100
+        local max_guesses=7
+        local number_of_guesses=0
 
-	# Start of main loop.
-	while true
-	do	
-		read -p "I'm thinking of a number between 1 and 100.  Guess it. " guess
-		
-		if (( guess < number ))
-		then
-			echo "Higher."
-		elif (( guess > number ))
-		then
-			echo "Lower."
-		else
-			echo "God dammit."
-			exit
-		fi
-	done
+        read -p "What's your name? " player
+        echo "I already don't like you, $player."
+        echo "Let's go."
+
+        # Start of main loop.
+        while true
+        do
+                read -p "I'm thinking of a number between 1 and 100.  Guess it. " guess
+
+                print_progress $number_of_guesses $max_guesses
+
+                if (( guess < number ))
+                then
+                        echo "Higher."
+                elif (( guess > number ))
+                then
+                        echo "Lower."
+                else
+                        echo "God dammit."
+                        exit
+                fi
+                number_of_guesses=$((number_of_guesses + 1))
+        done
+}
+
+# Prints N copies of the given string.
+# Parameters:
+#   $1: The string to print.
+#   $2: The number of times to print it (N).
+function print_n {
+    for ((i = 0; i < $2; ++i)); do
+      printf $1
+    done
 }
 
 function print_progress {
-	local current_guess=$1
-	local max_guesses=$2
-	
-	local field_width=
-	
-	if (( current_guess >= max_guesses )); then
-		for i in {0..$max_guesses}; do
-		  printf 
-		done
-	fi
+    local current_guess=$1
+    local max_guesses=$2
+    local message=""
+
+    if (( current_guess >= max_guesses )); then
+        message="******* GAME OVER *******"
+    elif (( current_guess == max_guesses - 1 )); then
+        message="This is your final guess."
+    else
+        message="You have $((max_guesses - current_guess)) guesses left."
+    fi
+
+    # Linear interpolation to find the progress bar length.
+    #
+    # u = 1 - current_guess/max_guesses.
+    max_length=${#message}
+    local b=$(( (current_guess * max_length / max_guesses)   ))
+    local a=$(( max_length - b ))
+    printf "%s\n" "$message"
+    print_n "█" $a
+
+    local b_char=" "
+    if (( a > 2*max_length/3 )); then
+      b_char="▓"
+    elif (( a > max_length/3 )); then
+      b_char="▒"
+    else
+      b_char="░"
+    fi
+    print_n $b_char $b
+    echo
 }
+
 mainloop
