@@ -7,7 +7,7 @@ function mainloop {
         read -p "What's your name? " player
         echo "I already don't like you, $player."
         echo "Let's go."
-
+		
         # Start of main loop.
         while true
         do
@@ -46,6 +46,7 @@ function print_progress {
 
     if (( current_guess >= max_guesses )); then
         message="******* GAME OVER *******"
+		exit 0
     elif (( current_guess == max_guesses - 1 )); then
         message="This is your final guess."
     else
