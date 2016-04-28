@@ -1,18 +1,22 @@
+More_insults=("I hate kittens and you. It's more" "You f**king suck at this. It's more")
+Less_insults=("You are a loser. It's less." "Kill yourself I hate you. It's less." "You fool it is obviously less")
+
 function main_loop {
 
-	local number=100
+	local number=$((RANDOM % 100))
 	read -p "What's your name player?" player
 	echo "$player ok lets play but first here's some bleach"
 	#start of mainloop
 	while true
 	do
-		read -p "Speak now or forever hold your peace between -1 and 100, $player: " guess
+		read -p "Speak now or forever hold your peace guess between 1 and 100, $player: " guess
 		if (( guess > number))
 		then
-			echo "You fool it is obviously less"
+			echo ${Less_insults[RANDOM % 3]}
+			
 		elif (( guess < number))
 		then
-			echo "dumb ass, it's higher"
+			echo ${More_insults[RANDOM % 2]}
 		else
 			echo "..."
 			echo "The computer has commited"
