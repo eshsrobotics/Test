@@ -1,6 +1,52 @@
+# Prints N copies of the given string.
+# Parameters:
+#   $1: The string to print.
+#   $2: The number of times to print it (N).
+function print_n {
+    for ((i = 0; i < $2; ++i)); do
+      printf $1
+    done
+}
+
+function print_progress {
+    local current_guess=$1
+    local max_guesses=$2
+    local message=""
+
+    if (( current_guess >= max_guesses )); then
+        message="******* GAME OVER *******"
+    elif (( current_guess == max_guesses - 1 )); then
+        message="This is your final guess."
+    else
+        message="You have $((max_guesses - current_guess)) guesses left."
+    fi
+
+    # Linear interpolation to find the progress bar length.
+    #
+    # u = 1 - current_guess/max_guesses.
+    max_length=${#message}
+    local b=$(( (current_guess * max_length / max_guesses)   ))
+    local a=$(( max_length - b ))
+    printf "%s\n" "$message"
+    print_n "█" $a
+
+    local b_char=" "
+    if (( a > 2*max_length/3 )); then
+      b_char="▓"
+    elif (( a > max_length/3 )); then
+      b_char="▒"
+    else
+      b_char="░"
+    fi
+    print_n $b_char $b
+    echo
+}
+
 function mainloop
 {
-	local number=17
+	local number=21 
+	local current_guess=0
+    local max_guesses=$((7 + 2))
 	echo "$number"
 	read -p "What's your name? " player
 	echo "$player you are a nerd."
@@ -9,18 +55,21 @@ function mainloop
 	while true
 	do
 		echo "Guess a number between one and one hundred."
-		read -p "What is your guess $player? " number
-		 if (( number < 17))
+		read -p "What is your guess $player? " guess
+		 if (( guess < number))
 		 then 
-			echo "Your guess was less than it nerd. Why was it $number?"
-		 elif (( number > 17))
+			echo "Your guess was less than it nerd. Why was it $guess?"
+			print_progress $current_guess $max_guesses  
+		 elif (( guess > number))
 		 then
-			echo "Your guess was more than it nerd. Why was it $number?"
+			echo "Your guess was more than it nerd. Why was it $guess?"
+			print_progress $current_guess $max_guesses
 		else 
 			echo "gg"
 			exit
-	fi	
-	
+		fi	
+		current_guess=$((current_guess + 1))
 	done
 }
 mainloop
+
