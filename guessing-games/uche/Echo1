@@ -56,18 +56,18 @@ function print_progress {
     #
     # u = 1 - current_guess/max_guesses.
     max_length=${#message}
-    local b=$(( (current_guess * max_length / max_guesses)   ))
+    local b=$(( (max_length * current_guess) / max_guesses ))
     local a=$(( max_length - b ))
     printf "%s\n" "$message"
-    print_n "█" $a
+    print_n "█" $a  # U+9608 FULL BLOCK
 
     local b_char=" "
     if (( a > 2*max_length/3 )); then
-      b_char="▓"
+      b_char="▓"    # U+9619 DARK SHADE
     elif (( a > max_length/3 )); then
-      b_char="▒"
+      b_char="▒"    # U+9618 MEDIUM SHADE
     else
-      b_char="░"
+      b_char="░"    # U+9617 LIGHT SHADE
     fi
     print_n $b_char $b
     echo
