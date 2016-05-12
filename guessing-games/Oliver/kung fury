@@ -4,6 +4,7 @@ Less_insults=("You are a loser. It's less." "Kill yourself I hate you. It's less
 function main_loop {
 
 	local number=$((RANDOM % 100))
+	local tries=0
 	read -p "What's your name player?" player
 	echo "$player ok lets play but first here's some bleach"
 	#start of mainloop
@@ -21,7 +22,16 @@ function main_loop {
 			echo "..."
 			echo "The computer has commited"
 			exit
-			fi
+		fi
+		
+		tries=$((tries+1))
+		echo "We're on turn #${tries}."
+		if ((tries==10))		
+		then 
+			echo "I win!! You can go kill yourself."
+			exit
+		fi
 	done
-	}
+}
+	
 main_loop
