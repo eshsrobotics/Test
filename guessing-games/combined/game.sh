@@ -297,7 +297,7 @@ function gameRespond {
         for ((i=0; i<${#types[@]}; ++i)); do
             if [[ $i != $playerNumber ]]; then
                 playerReply $i $playerNumber $guess "correct"
-                losses[$payerNumber]=$(( ${losses[$playerNumber]} + 1 ))
+                losses[$i]=$(( ${losses[$i]} + 1 ))
             fi
         done
 
