@@ -6,7 +6,8 @@ types=()   # The player type (such as "human" or "AI 1".)
 mins=()    # You can use this to store the minimum value the number could have (or not.)
 maxes=()   # You can use this to store the maximum value the number could have (or not.)
 guesses=() # Store the most recent guess here.
-
+wins=()    # Updated when the game ends.
+losses=()  # Updated when the game ends.
 debug=     # Set to 1 to print debugging statements.
 
 # ---------------------------------------------------------------------------
@@ -24,9 +25,9 @@ function playerInitialize {
 
         read -p "Player #$((playerNumber + 1)), what is your name? " name
 
-    elif [[ "$playerType" == "uche-ai" ]]; then
+    elif [[ "$playerType" == "binary-search" ]]; then
 
-        name="Gamblor the Great"
+        name="Computron"
 
     fi
 
@@ -61,18 +62,18 @@ function playerGuess {
     else
         # Computer players go here.
 
-        if [[ "$playerType" == "uche-ai" ]]; then
-
+        if [[ "$playerType" == "binary-search" ]]; then
             # Just guess the average.
             guess=$(( (max+min)/2 ))
         fi
 
-        echo "game> $playerName: I'm thinking of a number between $gameMin and $gameMax.  Enter your guess: {{ $guess }}"
+        printf "game> $playerName: I'm thinking of a number between $gameMin and $gameMax.  Enter your guess: "
+        dramaticPrint "$guess\n" 0.2 0 0.4
     fi
     guesses[$playerNumber]=$guess
 }
 
-# Gives a(n AI) player the opportunity to respond to a guess.
+# Gives a(n AI) player the opportunity to respond to a guess from a different player.
 #
 # Arguments:
 #   $1: The number of the (AI) player.
@@ -102,14 +103,15 @@ function playerReply {
     fi
 
     local message=
-    if [[ $playerType == "uche-ai" ]]; then
+    if [[ $playerType == "binary-search" ]]; then
 
         case "$enemyGuessType" in
             "too-low"|"too-high")
-                local insults=("THIS WILL BE EASIER THAN I IMAGINED" "PLEASE FINE-TUNE YOUR GUESSING ALGORITHM" "KEEP TRYING, HUMAN" "BUT THAT'S...NEVER MIND" "YOUR GUESS DOES NOT COMPUTE")
+                local insults=("THIS WILL BE EASIER THAN I IMAGINED" "PLEASE FINE-TUNE YOUR GUESSING ALGORITHM" "KEEP TRYING, HUMAN" "BUT THAT'S...NEVER MIND" "YOUR GUESS IS HIGHLY ILLOGICAL")
                 local taunts=("YOUR GUESS WAS STUPID" "FORGET IT, NOT WORTH THE ELECTRONS" "BRING YOUR A-GAME, HUMAN" "I KNOW TRANSISTORS WITH SUPERIOR GUESSING ABILITY" "KNAVE" "ERROR: WORTHY OPPONENT NOT FOUND" "PLEASE WASTE ANOTHER GUESS TO CONTINUE" "LET'S JUST SAY YOU'RE A FEW BITS SHORT OF A BYTE" "A MIND IS A TERRIBLE THING TO WASTE")
                 local random_taunt=${taunts[$(( RANDOM % ${#taunts[@]} ))]}
                 insults[${#insults[@]}]="LOADING INSULT DATABASE . . . $random_taunt"
+                insults[${#insults[@]}]="LOADING INSULT DATABASE . . . $random_taunt" # Taunt twice as often.
                 message=${insults[$(( RANDOM % ${#insults[@]} ))]}
                 # message=$random_taunt
                 ;;
@@ -122,9 +124,11 @@ function playerReply {
                     dramaticPrint "I LOST TO A\n\n    -HUMAN-\n\n" .05 .05 .5
                     dramaticPrint "DOES NOT COMPUTE\n" .03 .3 .5
                     dramaticPrint "DOES NOT COMPUTE\n" .015 .5 .6
-                    dramaticPrint "DOES NOT " 0 .8 1
-                    dramaticPrint "\n\n" 0 .3 0
-                    dramaticPrint "         ?PARSE ERROR ON LINE 1\n\n" 0 0 0
+                    dramaticPrint "DOES NO" 0 .8 0
+                    dramaticPrint "\n       ?PARSE ERROR ON LINE 1\n\n" 0 0 0
+                else
+                    dramaticPrint "I LOST TO A COMPUTER PLAYER\n" 0 0 1
+                    dramaticPrint "WELL, THAT'S ALRIGHT THEN\n" 0 0 0
                 fi
                 return
                 ;;
@@ -196,7 +200,10 @@ function gameAddPlayer {
     local playerType=$1
     local numPlayers="${#types[@]}"
 
-    types["$numPlayers"]="$playerType"
+    types[$numPlayers]="$playerType"
+    wins[$numPlayers]=0
+    losses[$numPlayers]=0
+
     playerInitialize "$numPlayers"
 }
 
@@ -216,8 +223,11 @@ function gameStart {
     guesses[$playerNumber]=
 }
 
-# Responds to a player's guess by printing "HIGHER!" or "LOWER!", then updates the min and max for that player
-# and all of the others.
+# Responds to a player's guess by printing "HIGHER!" or "LOWER!", then updates
+# the min and max for that player and all of the others.
+#
+# If a player won, the victory and loss counters are updated and the function
+# returns 1.  Otherwise, the function returns 0.
 #
 # Arguments:
 #   $1: The player number.
@@ -281,15 +291,20 @@ function gameRespond {
         done
     else
         echo "$playerName has won the game!"
+        wins[$playerNumber]=$(( ${wins[$playerNumber]} + 1 ))
+
         # Let the other players get one final round of responses.
         for ((i=0; i<${#types[@]}; ++i)); do
             if [[ $i != $playerNumber ]]; then
                 playerReply $i $playerNumber $guess "correct"
+                losses[$payerNumber]=$(( ${losses[$playerNumber]} + 1 ))
             fi
         done
+
+        return 1
     fi
 
-
+    return 0
 }
 
 # Plays the game.
@@ -303,7 +318,7 @@ function main {
     # players[${#players[@]}]=$(gameAddPlayer "human")
 
     gameAddPlayer "human"
-    gameAddPlayer "uche-ai"
+    gameAddPlayer "binary-search"
     local numPlayers=${#types[@]}
 
     for ((game=0; game<$games; ++game)); do
@@ -311,19 +326,46 @@ function main {
         # Reset the players for this game.
         local min=1
         local max=100
-        local number=17
+        local number=$(( RANDOM % (max - min) + 1 ))
         for ((playerNumber=0; playerNumber<$numPlayers; ++playerNumber)); do
             gameStart $playerNumber $min $max
         done
+        printf "game> Starting game #%d of %d.\n" "$((game + 1))" $games
+        printf "game> Good luck!\n"
 
         # Run the game.
         for ((round=0; round<$roundsPerGame; ++round)); do
             # Have each player make their guess.
+            local winner=
             for ((playerNumber=0; playerNumber<$numPlayers; ++playerNumber)); do
                 playerGuess $playerNumber $round $min $max
                 gameRespond $playerNumber $number $min $max
+                if (( $? != 0 )); then
+                    winner=$playerNumber
+                    break
+                fi
             done
+
+            if [[ "$winner" != "" ]]; then
+                # End the game early.
+                break
+            elif (( round == roundsPerGame )); then
+                # Ran out of turns.  Everyone loses.
+                printf "game> Sorry, but no one guessed my number in %d rounds." $roundsPerGame
+            fi
         done
+
+        # Find the overall winner.
+        highest_wins=0
+        winner=0
+        for ((i=0; i<${#types[@]}; ++i)); do
+            if (( highest_wins < ${wins[$i]} )); then
+                winner=$i
+                highest_wins=${wins[$i]}
+            fi
+        done
+        dramaticPrint "game> *** Game over. ***\n" 0 0 1.5
+        dramaticPrint "game> The winner, with ${wins[$winner]} wins and ${losses[$winner]} defeats, is ${names[$winner]}!\n" 0.005 0 0
     done
 }
 
